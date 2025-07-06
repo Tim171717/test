@@ -7,18 +7,24 @@ token = st.secrets["github_token"]
 g = Github(token)
 repo = g.get_repo("Tim171717/test")
 
-# New file content as string
-new_content = "name,age\nAlice,25\nBob,30"
+df = pd.read_csv('Plan_U13A_2526HR.csv')
+df['date'] = pd.to_datetime(df['date'])
 
-# Path to save it in the repo (can include folders)
-file_path = "data.csv"
+    # Update rows where date matches
+    df.loc[df['date'] == pd.to_datetime(date), 'selection'] = "['Prellen ', 'Duell um die Welt', 'Viereck passen - drei mal prellen für Punkt']"
+    df.loc[df['date'] == pd.to_datetime(date), 'category'] = "['Technik', 'Technik', 'Spielfähigkeit']"
+    df.loc[df['date'] == pd.to_datetime(date), 'catalog'] = 'U13A/Catalogs_U13A/Cat001.csv'
 
-# Commit message
-commit_message = "Add new data.csv from Streamlit app"
+    # Convert DataFrame back to CSV string
+    updated_content = df.to_csv(index=False)
 
-# Upload file (only if it doesn't already exist)
-try:
-    repo.create_file(path=file_path, message=commit_message, content=new_content, branch="main")
-    st.success("File uploaded successfully!")
-except Exception as e:
-    st.error(f"Upload failed: {e}")
+    # Push the updated content back to GitHub
+    repo.update_file(
+        path=file_path,
+        message=f"Updated {file_path} from Streamlit app",
+        content=updated_content,
+        sha=file.sha,
+        branch="main"
+    )
+
+    st.success(f"{file_path} updated successfully!")
