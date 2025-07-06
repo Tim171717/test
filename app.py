@@ -32,4 +32,4 @@ repo.update_file(
     branch="main"
 )
 
-st.success(f"{file_path} updated successfully!")
+st.success(f"{plan} updated successfully!")
