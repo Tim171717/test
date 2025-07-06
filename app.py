@@ -9,6 +9,8 @@ g = Github(token)
 repo = g.get_repo("Tim171717/test")
 
 plan = 'Plan_U13A_2526HR.csv'
+file = repo.get_contents(plan)
+
 df = pd.read_csv(plan)
 df['date'] = pd.to_datetime(df['date'])
 
