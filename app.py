@@ -2,6 +2,7 @@ import streamlit as st
 import asyncio
 from playwright.async_api import async_playwright
 import os
+import subprocess
 
 def install_playwright():
     """Function to install Playwright browser dependencies."""
