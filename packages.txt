@@ -21,3 +21,17 @@ libpangocairo-1.0-0
 libcairo-gobject2
 libgdk-pixbuf-2.0-0
 libx11-xcb1
+libxslt1-dev
+libwoff1
+libevent-dev
+libopus0
+libharfbuzz-dev
+gstreamer1.0-plugins-base
+libwebp-dev
+libenchant-2-dev
+libsecret-1-dev
+libhyphen-dev
+libmanette-0.2-0
+libflite1
+libgles2-mesa-dev
+libx264-dev
