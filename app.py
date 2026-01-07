@@ -3,21 +3,25 @@ import asyncio
 from playwright.async_api import async_playwright
 import os
 import subprocess
+import subprocess
+from pathlib import Path
 
-def install_playwright():
-    """Function to install Playwright browser dependencies."""
-    if 'playwright_installed' not in st.session_state:
-        # Run installation only if it hasn't been marked as done in the session state
-        subprocess.run(["playwright", "install"], check=True)
-        # subprocess.run(["playwright", "install-deps"], check=True)
-        st.session_state['playwright_installed'] = True
-        st.write("Playwright installed.")
-    else:
-        st.write("Playwright installation already completed.")
+if st.button("Start"):
+    try:
+        tex = r"""
+        \documentclass{article}
+        \begin{document}
+        Hello from Python.
+        \end{document}
+        """
 
-# Place this at the start of your app to ensure it runs when the app is first loaded
-install_playwright()
+        path = Path("example.tex")
+        path.write_text(tex)
 
-os.system('playwright install')
-os.system('playwright install-deps')
-st.write('done')
+        subprocess.run(
+            ["pdflatex", "-interaction=nonstopmode", path.name],
+            check=True
+        )
+
+    except Exception as e:
+        print(Exception)
