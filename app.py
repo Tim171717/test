@@ -23,5 +23,7 @@ if st.button("Start"):
             check=True
         )
 
+        print('success')
+
     except Exception as e:
         print(Exception)
