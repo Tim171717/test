@@ -1,96 +1,23 @@
-import requests
-import pandas as pd
 import streamlit as st
+import asyncio
+from playwright.async_api import async_playwright
+import os
+import subprocess
 
-coaches = {
-    "Büeler Timo Albert": "bde7781b-0499-441a-b437-7060951b3112",
-    "Fessler Tim Luis": "1be0c735-9f4a-4477-bf59-ffcc34dbc2f0",
-    "Ulrich Daniel": "1bcb8d2c-e0b5-4abc-bae7-2f38db8f39bd",
-    "Henseler Lukas": "a9cc0b12-98b7-415c-8782-1046ac4d88be"
-}
-
-players = {
-    "Beeler Luis": "c78a4248-09fc-427f-a833-523a60ffb574",
-    "Beeler Emil": "c78a4248-09fc-427f-a833-523a60ffb574",
-    "Senn Andrin": "3b55ac5c-bd63-4e7d-ad26-118fdd4ffffe",
-    "Kunz Sophia": "7301cd0d-50b1-4408-99c1-57877aa51761",
-    "Stierli Zeno": "11e468df-177b-4798-8d67-ca07f2fbb21e",
-    "Schmidt Mattia": "dc47f6a7-dae3-4f91-867d-66807fe1fdaa",
-    "Conte Samina": "48f84fa5-8ddc-4eda-abe9-547a632d1cdd",
-    "Guadarrama Noelia": "099a142e-4bdd-4990-803f-fbb3a8488903",
-    "Rrahmani Amina": "7252d638-c236-47ba-a813-4d6333304430",
-    "Gisler Melanie": "da7c5487-2dc1-4cbd-9489-ba6fb0439fab",
-    "Gisler Ariana": "da7c5487-2dc1-4cbd-9489-ba6fb0439fab",
-    "Gisler Sandro": "da7c5487-2dc1-4cbd-9489-ba6fb0439fab",
-    "Meier Fynn Noël": "7acb9f60-1344-4504-887e-c2fd3c71f441",
-    "Blagojevic Mihailo": "e6cc8992-e83b-46cf-a525-5ff35ae0d53b",
-    "Schuler Livia": "77f868d0-9353-4b36-8a79-dea3ef73e596",
-    "Habermacher Luis": "ead23224-6ed0-4d36-9ce1-772d234290f2",
-    "Garcia Ray": "84acd7bf-a295-499a-bb0c-9b56f8c62ebb",
-    "Auf der Maur Kian": "057c1aeb-4231-40bf-ad2b-1129559c51c4",
-    "Auf der Maur Finn": "a97e2b03-40e8-492f-a3f4-686fa4b2c833",
-    "Andersen Benedikt": "4300faff-ea19-4b12-9f9f-118e4974404a",
-    "Beeler Kilian": "e6874469-e8bb-4a79-9d0f-4e45c510db1c",
-    "Betschart Samira": "149c7445-319c-4894-9b8f-d27aebd8c9b8",
-    "Schwegler Nils": "6eab9421-e450-4437-b701-c9fd79d0dfc4",
-    "Wattinger Samuel": "06028984-813b-4ac6-9a9a-14b156890796",
-    "Christen Gianluca": "eed1f547-a148-4e0f-ab48-288e8626aa82",
-    "Bättig Lou": "6e13652c-27db-427c-b694-5cc440a26d70",
-    "Gwerder Niklas": "fa18781b-42e8-4adc-9f33-c1ae4a03997b",
-    "Frei Lio Adriano": "a5f72433-c2dd-40ac-937e-4185f1da57ca",
-    "Stalder Leevi": "06e7172a-7aa8-46c1-9aa4-9043f75678fc",
-    "Bostan Sofia": "5cd13590-cbb3-4d9b-80de-2e3653047b7a",
-    "Zgraggen Nevin": "a4c8e730-9ba4-46c7-b2ba-94bd9c4b33ad",
-    "Geisser Leano": "291d466b-503b-4a20-a99d-6b96f591dcaf",
-}
-
-
-# Example: load your status_df from CSV (or build in memory)
-status_df = pd.read_csv("attendance_status.csv")
-
-# Split into coaches and players
-coaches_df = status_df[status_df["Role"] == "Coach"].reset_index(drop=True)
-players_df = status_df[status_df["Role"] == "Player"].reset_index(drop=True)
-
-st.title("Attendance Overview ✅")
-
-# Function to map status to color + emoji
-def status_to_color(status):
-    if status == 1:
-        return "🟢"
-    elif status == 2:
-        return "🔴"
+def install_playwright():
+    """Function to install Playwright browser dependencies."""
+    if 'playwright_installed' not in st.session_state:
+        # Run installation only if it hasn't been marked as done in the session state
+        subprocess.run(["playwright", "install"], check=True)
+        # subprocess.run(["playwright", "install-deps"], check=True)
+        st.session_state['playwright_installed'] = True
+        st.write("Playwright installed.")
     else:
-        return "🟡"
+        st.write("Playwright installation already completed.")
 
-# Dictionary to store checkbox states
-if "checkbox_states" not in st.session_state:
-    st.session_state.checkbox_states = {}
+# Place this at the start of your app to ensure it runs when the app is first loaded
+install_playwright()
 
-def render_table(df, role):
-    st.subheader(f"{role}s")
-
-    for _, row in df.iterrows():
-        name = row["Name"]
-        status = row["Status"]
-
-        cols = st.columns([3, 1, 1])  # Name | Status | Checkbox
-        with cols[0]:
-            st.write(name)
-        with cols[1]:
-            st.write(status_to_color(status))
-        with cols[2]:
-            checked = (status == 1)
-            # use unique key per row
-            st.session_state.checkbox_states[name] = st.checkbox(
-                str(row), value=checked, key=f"{role}_{name}", label_visibility='collapsed'
-            )
-
-# Render tables
-render_table(coaches_df, "Coach")
-render_table(players_df, "Player")
-
-# Button to display results
-if st.button("Show Results"):
-    st.write("Final selection:")
-    st.json(st.session_state.checkbox_states)
+os.system('playwright install')
+os.system('playwright install-deps')
+st.write('done')
